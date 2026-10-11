@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DL STORE - Loja Gamer Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        .glow-box {
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        /* Toast notification positioning */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+    <!-- Toast Notifications Container -->
+    <div id="toastContainer" class="flex flex-col space-y-2 pointer-events-none"></div>
+
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="filterCategory('all')">
+                <div class="w-11 h-11 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-cyan-500/30">
+                    DL
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        DL STORE
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Contas e Frutas Blox Fruits</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal('adminModal')" class="px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs sm:text-sm font-semibold transition flex items-center space-x-2">
+                    <i class="fa-solid font-bold fa-lock text-cyan-400"></i>
+                    <span class="hidden sm:inline">Painel Admin</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        
+        <!-- Banner / Hero -->
+        <div class="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 p-6 sm:p-10 border border-slate-800 mb-8 relative overflow-hidden shadow-2xl">
+            <div class="relative z-10 max-w-2xl">
+                <span class="inline-block px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-bold uppercase tracking-wider mb-3">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Entrega Rápida e Garantida
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-black text-white leading-tight mb-3">
+                    As Melhores Contas e Itens de Blox Fruits
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                    Compre suas contas com frutas míticas, Godhuman, raça V4 e muito mais. Segurança total e atendimento via WhatsApp.
+                </p>
+            </div>
+        </div>
+
+        <!-- Filter Categories Bar -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center">
+                    <i class="fa-solid fa-layer-group text-cyan-400 mr-2"></i> Categorias
+                </h3>
+            </div>
+            <div id="categoryFilters" class="flex flex-wrap gap-2">
+                <!-- Dynamically populated categories -->
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="mb-6">
+            <h3 class="text-xl font-bold text-white mb-6 flex items-center">
+                <i class="fa-solid fa-store text-cyan-400 mr-2"></i> Catálogo Disponível
+            </h3>
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Dynamically populated products -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-950 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-400 text-sm">© 2026 DL STORE. Todos os direitos reservados.</p>
+            <p class="text-slate-600 text-xs mt-1">Entrega de itens e contas digitais para jogos.</p>
+        </div>
+    </footer>
+
+    <div id="checkoutModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeModal('checkoutModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Checkout Step 1: User Info & Email Validation -->
+            <div id="checkoutStep1">
+                <div class="text-center mb-6">
+                    <div class="w-14 h-14 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <h3 id="checkoutTitle" class="text-xl font-bold text-white">Finalizar Compra</h3>
+                    <p id="checkoutPrice" class="text-cyan-400 font-extrabold text-2xl mt-1">R$ 0,00</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Nome Completo *</label>
+                        <input type="text" id="custName" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 text-sm" placeholder="Ex: João Silva">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">E-mail *</label>
+                        <input type="email" id="custEmail" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 text-sm" placeholder="seuemail@gmail.com">
+                        <p class="text-xs text-slate-400 mt-1">Aceitamos: @gmail, @hotmail, @outlook, @yahoo, @icloud</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">WhatsApp *</label>
+                        <input type="text" id="custPhone" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 text-sm" placeholder="(11) 99999-9999">
+                    </div>
+
+                    <div id="checkoutError" class="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-semibold hidden">
+                        <!-- Error Message -->
+                    </div>
+
+                    <button onclick="startEmailConfirmation()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-2xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2">
+                        <span>Avançar para o Pagamento</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Checkout Step 2: Verification Code -->
+            <div id="checkoutStep2" class="hidden text-center">
+                <div class="w-14 h-14 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+                    <i class="fa-solid fa-envelope-circle-check"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Confirmação de E-mail</h3>
+                <p class="text-slate-300 text-sm mb-4">Insira o código de validação exibido para o e-mail: <br><strong id="displayCustomerEmail" class="text-cyan-400"></strong></p>
+
+                <div class="p-3 bg-slate-800/80 border border-slate-700 rounded-xl mb-4">
+                    <p class="text-xs text-slate-400">Código de Verificação de Segurança:</p>
+                    <p id="generatedVerificationCode" class="text-2xl font-black tracking-widest text-cyan-400 my-1">123456</p>
+                </div>
+
+                <div class="mb-4">
+                    <input type="text" id="inputVerificationCode" maxlength="6" class="w-full text-center tracking-widest text-xl font-bold bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500" placeholder="000000">
+                </div>
+
+                <div id="codeError" class="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-semibold mb-4 hidden">
+                    Código incorreto! Digite o código exibido acima.
+                </div>
+
+                <button onclick="verifyCodeAndProceed()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Confirmar E-mail e Ver Pix</span>
+                </button>
+            </div>
+
+            <!-- Checkout Step 3: Pix QR Code & Payment Pending -->
+            <div id="checkoutStep3" class="hidden text-center">
+                <div class="w-14 h-14 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+                    <i class="fa-brands fa-pix"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Pagamento via Pix</h3>
+                <p class="text-slate-400 text-xs mt-1 mb-4">Chave Pix: <span class="text-cyan-400 font-mono">a7ef40ee-1407-446d-934b-7bdf7d299549</span></p>
+
+                <div class="bg-white p-4 rounded-2xl inline-block mb-4 shadow-lg">
+                    <img id="pixQrImg" src="" alt="Pix QR Code" class="w-48 h-48 mx-auto">
+                </div>
+
+                <div class="mb-4">
+                    <button onclick="copyPixKey()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold rounded-xl text-sm transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-copy text-cyan-400"></i>
+                        <span>Copiar Chave Pix</span>
+                    </button>
+                </div>
+
+                <div id="pixAwaitingBox" class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl mb-4 text-left">
+                    <div class="flex items-center space-x-3 text-amber-400 font-bold text-sm mb-1">
+                        <i class="fa-solid fa-hourglass-half animate-spin"></i>
+                        <span>Aguardando Confirmação do Pix...</span>
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Após realizar a transferência no seu aplicativo do banco, envie o comprovante para nosso atendimento no WhatsApp para liberar a conta imediatamente.
+                    </p>
+                </div>
+
+                <div class="space-y-2">
+                    <button onclick="sendReceiptToWhatsapp()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span>Enviar Comprovante no WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-4xl w-full p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeModal('adminModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Admin Password Login -->
+            <div id="adminAuth">
+                <div class="text-center mb-6">
+                    <div class="w-14 h-14 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Painel Administrativo</h3>
+                    <p class="text-slate-400 text-xs">Digite a senha para acessar o gerenciador</p>
+                </div>
+
+                <div class="max-w-xs mx-auto space-y-3">
+                    <input type="password" id="adminPassInput" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-center text-lg focus:outline-none focus:border-cyan-500" placeholder="Senha do Admin">
+                    <div id="adminAuthError" class="text-red-400 text-xs text-center font-semibold hidden">Senha Incorreta!</div>
+                    <button onclick="loginAdmin()" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl transition">
+                        Acessar Painel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Content (After Login) -->
+            <div id="adminContent" class="hidden">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center">
+                            <i class="fa-solid fa-gears text-cyan-400 mr-2"></i> Painel DL STORE
+                        </h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="switchAdminTab('sales')" id="tabBtnSales" class="px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-black">
+                            Vendas
+                        </button>
+                        <button onclick="switchAdminTab('products')" id="tabBtnProducts" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300">
+                            Produtos
+                        </button>
+                        <button onclick="switchAdminTab('categories')" id="tabBtnCategories" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300">
+                            Categorias
+                        </button>
+                        <button onclick="switchAdminTab('backup')" id="tabBtnBackup" class="px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Backup & Dados
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Tab: Sales / Order Approval -->
+                <div id="adminTabSales" class="space-y-4">
+                    <h4 class="text-sm font-bold text-slate-300 uppercase">Pedidos Recentes e Liberações</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-800/80 text-xs text-slate-400 uppercase">
+                                <tr>
+                                    <th class="p-3">Data/Hora</th>
+                                    <th class="p-3">Cliente</th>
+                                    <th class="p-3">E-mail / Status</th>
+                                    <th class="p-3">Produto</th>
+                                    <th class="p-3">Valor</th>
+                                    <th class="p-3">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTableBody" class="divide-y divide-slate-800">
+                                <!-- Dynamically filled with sales orders -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Admin Tab: Products Management -->
+                <div id="adminTabProducts" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-sm font-bold text-slate-300 uppercase">Gerenciar Catálogo de Contas</h4>
+                        <button onclick="openProductForm()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center space-x-1">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Novo Produto</span>
+                        </button>
+                    </div>
+
+                    <!-- Product List -->
+                    <div id="adminProductsList" class="space-y-3">
+                        <!-- Rendered admin product items -->
+                    </div>
+                </div>
+
+                <!-- Admin Tab: Categories Management -->
+                <div id="adminTabCategories" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-sm font-bold text-slate-300 uppercase">Gerenciar Categorias</h4>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <input type="text" id="newCategoryInput" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm" placeholder="Nome da Categoria (Ex: Raça V4)">
+                        <button onclick="addCategory()" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl text-sm">
+                            Adicionar
+                        </button>
+                    </div>
+
+                    <div id="adminCategoriesList" class="space-y-2">
+                        <!-- Category list populated here -->
+                    </div>
+                </div>
+
+                <!-- Admin Tab: Backup & Save Management -->
+                <div id="adminTabBackup" class="hidden space-y-6">
+                    <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-2xl space-y-4">
+                        <div>
+                            <h4 class="text-base font-bold text-amber-400 flex items-center">
+                                <i class="fa-solid fa-download mr-2"></i> Exportar Dados (Salvar no Computador)
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Baixe um arquivo com todos os seus produtos, estoque de contas e categorias cadastradas para ter segurança total.</p>
+                        </div>
+                        <button onclick="exportBackupData()" class="px-4 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span>Exportar Backup (JSON)</span>
+                        </button>
+                    </div>
+
+                    <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-2xl space-y-4">
+                        <div>
+                            <h4 class="text-base font-bold text-cyan-400 flex items-center">
+                                <i class="fa-solid fa-upload mr-2"></i> Importar Dados (Restaurar)
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Se você trocou de computador ou abriu o site de novo, selecione seu arquivo de backup para restaurar tudo.</p>
+                        </div>
+                        <input type="file" id="importFileInput" accept=".json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600">
+                        <button onclick="importBackupData()" class="px-4 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-file-import"></i>
+                            <span>Carregar e Salvar no Site</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="productFormModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <button onclick="closeModal('productFormModal')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 id="productFormTitle" class="text-xl font-bold text-white mb-4">Adicionar Novo Produto</h3>
+
+            <div class="space-y-4">
+                <input type="hidden" id="editProductId">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Título do Produto</label>
+                    <input type="text" id="pTitle" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm" placeholder="Ex: Conta Blox Fruits Max + Dough">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Preço (R$)</label>
+                    <input type="number" step="0.01" id="pPrice" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm" placeholder="29.90">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Categoria</label>
+                    <select id="pCategory" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm">
+                        <!-- Populated with categories -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">URL da Imagem</label>
+                    <input type="text" id="pImg" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm" placeholder="https://...">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Descrição</label>
+                    <textarea id="pDesc" rows="3" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm" placeholder="Detalhes do item/conta..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Estoque - Contas (Uma por linha: usuario:senha)</label>
+                    <textarea id="pAccounts" rows="4" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 font-mono text-xs text-emerald-400" placeholder="usuario1:senha123&#10;usuario2:senha456"></textarea>
+                    <p class="text-xs text-slate-400 mt-1">O estoque é calculado pela quantidade de linhas preenchidas acima.</p>
+                </div>
+
+                <button onclick="saveProduct()" class="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-xl transition">
+                    Salvar Produto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let categories = JSON.parse(localStorage.getItem('dl_categories')) || [
+            { id: 'all', name: 'Todas as Contas' },
+            { id: 'miticas', name: 'Frutas Míticas' },
+            { id: 'racav4', name: 'Raça V4' },
+            { id: 'godhuman', name: 'Godhuman' }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('dl_products')) || [
+            {
+                id: 1,
+                title: "Conta Godhuman + Dough V2 Ingerida",
+                price: 39.90,
+                category: "miticas",
+                img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500&auto=format&fit=crop&q=60",
+                desc: "Nível Max 2550, Godhuman, Dough V2, Cursed Dual Katana no inventário.",
+                accounts: ["blox_master99:senhaSegura123", "pirata_v4:mypassword888"]
+            },
+            {
+                id: 2,
+                title: "Conta Raça V4 Full + CDK + Soul Guitar",
+                price: 59.90,
+                category: "racav4",
+                img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&auto=format&fit=crop&q=60",
+                desc: "Raça V4 ativada, itens míticos, estilo de luta completado.",
+                accounts: ["v4_legend:pirata2026"]
+            }
+        ];
+
+        let orders = JSON.parse(localStorage.getItem('dl_orders')) || [];
+        let activeCategory = 'all';
+        let currentCheckoutProduct = null;
+        let generatedCode = '';
+
+        const STORE_ADMIN_PASS = "1912";
+        const OWNER_WHATSAPP = "5511955795988";
+        const PIX_KEY = "a7ef40ee-1407-446d-934b-7bdf7d299549";
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-cyan-600');
+            const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-bell');
+
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 pointer-events-auto transition-all duration-300 transform translate-y-[-10px] opacity-0`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-lg"></i>
+                <span class="text-xs font-bold">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Save Function helper
+        function persistAllData() {
+            localStorage.setItem('dl_categories', JSON.stringify(categories));
+            localStorage.setItem('dl_products', JSON.stringify(products));
+            localStorage.setItem('dl_orders', JSON.stringify(orders));
+        }
+
+        // Initialization
+        window.onload = function() {
+            renderCategories();
+            renderProducts();
+        };
+
+        // Render Category Filter Buttons
+        function renderCategories() {
+            const container = document.getElementById('categoryFilters');
+            const selectContainer = document.getElementById('pCategory');
+            
+            container.innerHTML = '';
+            if (selectContainer) selectContainer.innerHTML = '';
+
+            categories.forEach(cat => {
+                const isActive = activeCategory === cat.id;
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
+                    isActive 
+                    ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' 
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`;
+                btn.innerHTML = `<span>${cat.name}</span>`;
+                btn.onclick = () => filterCategory(cat.id);
+                container.appendChild(btn);
+
+                if (selectContainer && cat.id !== 'all') {
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.innerText = cat.name;
+                    selectContainer.appendChild(opt);
+                }
+            });
+        }
+
+        function filterCategory(catId) {
+            activeCategory = catId;
+            renderCategories();
+            renderProducts();
+        }
+
+        // Render Products List for Store
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            const filtered = activeCategory === 'all' 
+                ? products 
+                : products.filter(p => p.category === activeCategory);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-500">
+                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                        <p>Nenhum produto encontrado nesta categoria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const stock = p.accounts ? p.accounts.filter(a => a.trim() !== '').length : 0;
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 transition flex flex-col justify-between group";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x400/0f172a/06b6d4?text=Blox+Fruits'">
+                            <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${stock > 0 ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400' : 'bg-red-500/20 border border-red-500/40 text-red-400'}">
+                                ${stock > 0 ? `Estoque: ${stock}` : 'Esgotado'}
+                            </span>
+                        </div>
+                        <div class="p-5">
+                            <h4 class="font-bold text-white text-base mb-2 group-hover:text-cyan-400 transition">${p.title}</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2 mb-4">${p.desc}</p>
+                        </div>
+                    </div>
+                    <div class="p-5 pt-0">
+                        <div class="flex items-center justify-between pt-4 border-t border-slate-800/80">
+                            <div>
+                                <span class="text-xs text-slate-400 block">Valor</span>
+                                <span class="text-xl font-extrabold text-cyan-400">R$ ${p.price.toFixed(2)}</span>
+                            </div>
+                            <button onclick="startCheckout(${p.id})" ${stock === 0 ? 'disabled' : ''} class="px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center space-x-1 ${stock > 0 ? 'bg-cyan-500 hover:bg-cyan-400 text-black' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span>${stock > 0 ? 'Comprar' : 'Esgotado'}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Checkout Flow
+        function startCheckout(productId) {
+            currentCheckoutProduct = products.find(p => p.id === productId);
+            if (!currentCheckoutProduct) return;
+
+            document.getElementById('checkoutTitle').innerText = currentCheckoutProduct.title;
+            document.getElementById('checkoutPrice').innerText = `R$ ${currentCheckoutProduct.price.toFixed(2)}`;
+            
+            document.getElementById('checkoutStep1').classList.remove('hidden');
+            document.getElementById('checkoutStep2').classList.add('hidden');
+            document.getElementById('checkoutStep3').classList.add('hidden');
+            document.getElementById('checkoutError').classList.add('hidden');
+
+            showToast(`Iniciando compra: ${currentCheckoutProduct.title}`, 'info');
+            openModal('checkoutModal');
+        }
+
+        function startEmailConfirmation() {
+            const name = document.getElementById('custName').value.trim();
+            const email = document.getElementById('custEmail').value.trim().toLowerCase();
+            const phone = document.getElementById('custPhone').value.trim();
+            const errBox = document.getElementById('checkoutError');
+
+            if (!name || !email || !phone) {
+                errBox.innerText = "Por favor, preencha todos os campos obrigatórios!";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const validDomains = ['@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com', '@icloud.com'];
+            const isValidEmail = validDomains.some(domain => email.endsWith(domain));
+
+            if (!isValidEmail) {
+                errBox.innerText = "Informe um e-mail válido (@gmail, @hotmail, @outlook, @yahoo ou @icloud)!";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            
+            generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('displayCustomerEmail').innerText = email;
+            document.getElementById('generatedVerificationCode').innerText = generatedCode;
+
+            document.getElementById('checkoutStep1').classList.add('hidden');
+            document.getElementById('checkoutStep2').classList.remove('hidden');
+        }
+
+        function verifyCodeAndProceed() {
+            const inputCode = document.getElementById('inputVerificationCode').value.trim();
+            const codeErr = document.getElementById('codeError');
+
+            if (inputCode !== generatedCode) {
+                codeErr.classList.remove('hidden');
+                return;
+            }
+
+            codeErr.classList.add('hidden');
+
+            const order = {
+                id: 'ORD-' + Date.now(),
+                date: new Date().toLocaleString('pt-BR'),
+                customerName: document.getElementById('custName').value.trim(),
+                customerEmail: document.getElementById('custEmail').value.trim(),
+                customerPhone: document.getElementById('custPhone').value.trim(),
+                productTitle: currentCheckoutProduct.title,
+                productId: currentCheckoutProduct.id,
+                price: currentCheckoutProduct.price,
+                status: 'PENDENTE'
+            };
+
+            orders.unshift(order);
+            persistAllData();
+
+            showToast("Novo pedido de compra registrado com sucesso!", "success");
+
+            const pixUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(PIX_KEY)}`;
+            document.getElementById('pixQrImg').src = pixUrl;
+
+            document.getElementById('checkoutStep2').classList.add('hidden');
+            document.getElementById('checkoutStep3').classList.remove('hidden');
+        }
+
+        function copyPixKey() {
+            navigator.clipboard.writeText(PIX_KEY);
+            showToast("Chave Pix copiada para a área de transferência!", "success");
+        }
+
+        function sendReceiptToWhatsapp() {
+            const name = document.getElementById('custName').value.trim();
+            const email = document.getElementById('custEmail').value.trim();
+            const msg = `Olá! Fiz o pagamento do produto *${currentCheckoutProduct.title}* no valor de *R$ ${currentCheckoutProduct.price.toFixed(2)}*.\n\n*Dados:* \nNome: ${name}\nE-mail: ${email}\n\nEstou enviando o comprovante!`;
+            
+            window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Admin Management
+        function loginAdmin() {
+            const pass = document.getElementById('adminPassInput').value;
+            const err = document.getElementById('adminAuthError');
+
+            if (pass === STORE_ADMIN_PASS) {
+                err.classList.add('hidden');
+                document.getElementById('adminAuth').classList.add('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
+                renderAdminSales();
+                renderAdminProducts();
+                renderAdminCategories();
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function switchAdminTab(tab) {
+            document.getElementById('adminTabSales').classList.add('hidden');
+            document.getElementById('adminTabProducts').classList.add('hidden');
+            document.getElementById('adminTabCategories').classList.add('hidden');
+            document.getElementById('adminTabBackup').classList.add('hidden');
+
+            document.getElementById('tabBtnSales').className = "px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300";
+            document.getElementById('tabBtnProducts').className = "px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300";
+            document.getElementById('tabBtnCategories').className = "px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300";
+            document.getElementById('tabBtnBackup').className = "px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+
+            if (tab === 'sales') {
+                document.getElementById('adminTabSales').classList.remove('hidden');
+                document.getElementById('tabBtnSales').className = "px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-black";
+                renderAdminSales();
+            } else if (tab === 'products') {
+                document.getElementById('adminTabProducts').classList.remove('hidden');
+                document.getElementById('tabBtnProducts').className = "px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-black";
+                renderAdminProducts();
+            } else if (tab === 'categories') {
+                document.getElementById('adminTabCategories').classList.remove('hidden');
+                document.getElementById('tabBtnCategories').className = "px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-black";
+                renderAdminCategories();
+            } else if (tab === 'backup') {
+                document.getElementById('adminTabBackup').classList.remove('hidden');
+                document.getElementById('tabBtnBackup').className = "px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-black";
+            }
+        }
+
+        function renderAdminSales() {
+            const tbody = document.getElementById('salesTableBody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Nenhum pedido efetuado até o momento.</td></tr>`;
+                return;
+            }
+
+            orders.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 text-xs text-slate-400">${o.date}</td>
+                    <td class="p-3 font-bold text-white">${o.customerName}<br><span class="text-xs text-slate-400">${o.customerPhone}</span></td>
+                    <td class="p-3 text-xs">
+                        <span class="text-slate-300">${o.customerEmail}</span><br>
+                        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 mt-1">✔ E-mail Confirmado</span>
+                    </td>
+                    <td class="p-3 text-cyan-400 font-semibold">${o.productTitle}</td>
+                    <td class="p-3 font-bold text-white">R$ ${o.price.toFixed(2)}</td>
+                    <td class="p-3">
+                        ${o.status === 'PENDENTE' ? `
+                            <button onclick="approveOrder('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold">
+                                Aprovar e Liberar
+                            </button>
+                        ` : `
+                            <span class="text-xs font-bold text-emerald-400">LIBERADO</span>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function approveOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const product = products.find(p => p.id === order.productId);
+            if (!product || !product.accounts || product.accounts.length === 0) {
+                showToast("Erro: Não há estoque de contas para este produto!", "error");
+                return;
+            }
+
+            const accountToDeliver = product.accounts.shift();
+            order.status = 'Aprovado';
+
+            persistAllData();
+            renderProducts();
+            renderAdminSales();
+
+            showToast("Conta aprovada e liberada com sucesso!", "success");
+
+            const msg = `Olá *${order.customerName}*! Seu pagamento foi aprovado.\n\n*Sua Conta Blox Fruits:*\n${accountToDeliver}\n\nObrigado por comprar na DL STORE!`;
+            window.open(`https://wa.me/55${order.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function renderAdminProducts() {
+            const container = document.getElementById('adminProductsList');
+            container.innerHTML = '';
+
+            products.forEach(p => {
+                const stock = p.accounts ? p.accounts.filter(a => a.trim() !== '').length : 0;
+                const div = document.createElement('div');
+                div.className = "p-4 bg-slate-800/60 border border-slate-700/80 rounded-2xl flex items-center justify-between";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${p.img}" class="w-12 h-12 rounded-xl object-cover">
+                        <div>
+                            <h5 class="font-bold text-white text-sm">${p.title}</h5>
+                            <p class="text-xs text-slate-400">R$ ${p.price.toFixed(2)} | Estoque: <strong class="text-emerald-400">${stock}</strong></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openProductForm(${p.id})" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold">Editar</button>
+                        <button onclick="deleteProduct(${p.id})" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-500 text-white rounded-xl text-xs font-bold">Excluir</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openProductForm(id = null) {
+            if (id) {
+                const p = products.find(x => x.id === id);
+                document.getElementById('productFormTitle').innerText = "Editar Produto";
+                document.getElementById('editProductId').value = p.id;
+                document.getElementById('pTitle').value = p.title;
+                document.getElementById('pPrice').value = p.price;
+                document.getElementById('pCategory').value = p.category;
+                document.getElementById('pImg').value = p.img;
+                document.getElementById('pDesc').value = p.desc;
+                document.getElementById('pAccounts').value = p.accounts ? p.accounts.join('\n') : '';
+            } else {
+                document.getElementById('productFormTitle').innerText = "Adicionar Novo Produto";
+                document.getElementById('editProductId').value = '';
+                document.getElementById('pTitle').value = '';
+                document.getElementById('pPrice').value = '';
+                document.getElementById('pImg').value = '';
+                document.getElementById('pDesc').value = '';
+                document.getElementById('pAccounts').value = '';
+            }
+            openModal('productFormModal');
+        }
+
+        function saveProduct() {
+            const editId = document.getElementById('editProductId').value;
+            const title = document.getElementById('pTitle').value.trim();
+            const price = parseFloat(document.getElementById('pPrice').value);
+            const category = document.getElementById('pCategory').value;
+            const img = document.getElementById('pImg').value.trim();
+            const desc = document.getElementById('pDesc').value.trim();
+            const accountsRaw = document.getElementById('pAccounts').value;
+            const accounts = accountsRaw.split('\n').map(a => a.trim()).filter(a => a !== '');
+
+            if (!title || isNaN(price)) {
+                showToast("Preencha ao menos o título e valor do produto!", "error");
+                return;
+            }
+
+            if (editId) {
+                const index = products.findIndex(p => p.id == editId);
+                if (index !== -1) {
+                    products[index] = { id: parseInt(editId), title, price, category, img, desc, accounts };
+                }
+            } else {
+                const newProduct = {
+                    id: Date.now(),
+                    title,
+                    price,
+                    category,
+                    img: img || 'https://placehold.co/600x400/0f172a/06b6d4?text=Blox+Fruits',
+                    desc,
+                    accounts
+                };
+                products.push(newProduct);
+            }
+
+            persistAllData();
+            showToast("Produto salvo com sucesso!", "success");
+
+            closeModal('productFormModal');
+            renderProducts();
+            renderAdminProducts();
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Tem certeza que deseja excluir este produto?")) {
+                products = products.filter(p => p.id !== id);
+                persistAllData();
+                showToast("Produto removido!", "info");
+                renderProducts();
+                renderAdminProducts();
+            }
+        }
+
+        function renderAdminCategories() {
+            const container = document.getElementById('adminCategoriesList');
+            container.innerHTML = '';
+
+            categories.forEach(cat => {
+                if (cat.id === 'all') return;
+                const div = document.createElement('div');
+                div.className = "p-3 bg-slate-800/60 border border-slate-700/80 rounded-xl flex items-center justify-between";
+                div.innerHTML = `
+                    <span class="font-bold text-white text-sm">${cat.name}</span>
+                    <button onclick="deleteCategory('${cat.id}')" class="px-3 py-1 bg-red-600/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold">Remover</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addCategory() {
+            const input = document.getElementById('newCategoryInput');
+            const name = input.value.trim();
+
+            if (!name) return;
+
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            categories.push({ id, name });
+            persistAllData();
+            showToast("Categoria adicionada com sucesso!", "success");
+
+            input.value = '';
+            renderCategories();
+            renderAdminCategories();
+        }
+
+        function deleteCategory(id) {
+            categories = categories.filter(c => c.id !== id);
+            persistAllData();
+            showToast("Categoria removida!", "info");
+            renderCategories();
+            renderAdminCategories();
+        }
+
+        // Backup Export / Import Functions
+        function exportBackupData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                categories,
+                products,
+                orders
+            }, null, 2));
+
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `dl_store_backup_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            showToast("Backup baixado com sucesso!", "success");
+        }
+
+        function importBackupData() {
+            const fileInput = document.getElementById('importFileInput');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast("Selecione um arquivo .json para importar!", "error");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.categories) categories = data.categories;
+                    if (data.products) products = data.products;
+                    if (data.orders) orders = data.orders;
+
+                    persistAllData();
+                    renderCategories();
+                    renderProducts();
+                    renderAdminProducts();
+                    renderAdminCategories();
+                    renderAdminSales();
+
+                    showToast("Dados restaurados e salvos no site com sucesso!", "success");
+                } catch (err) {
+                    showToast("Erro ao ler arquivo de backup inválido!", "error");
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
